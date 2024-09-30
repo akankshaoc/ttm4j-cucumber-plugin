@@ -72,12 +72,13 @@ public class ReporterListeners implements EventListener {
                 step.setActualResult(testStepFinished.getResult().getError().getMessage());
                 step.setStatus("FAILED");
             }
-            testRunRunningStep.put(testCase, step);
+            testRunRunningStep.put(testCase, null);
             List<Step> steps = ttm4jTest.getSteps();
             if(steps == null) steps = new ArrayList<>();
             steps.add(step);
             ttm4jTest.setSteps(steps);
             testRuns.put(testCase, ttm4jTest);
+
         } else {
             Step step = testRunRunningStep.get(testCase);
             if(step == null) {
@@ -93,6 +94,7 @@ public class ReporterListeners implements EventListener {
     }
 
     public void testCaseFinished(TestCaseFinished testCaseFinished) {
+        if(!testRuns.containsKey(testCaseFinished.getTestCase())) return;
         TestRun testRun = testRuns.get(testCaseFinished.getTestCase());
         testRun.setStatus(testCaseFinished.getResult().getStatus().toString());
         testRunController.postTestRun(testRun);
