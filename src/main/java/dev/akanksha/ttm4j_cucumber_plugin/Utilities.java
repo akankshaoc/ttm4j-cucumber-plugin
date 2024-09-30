@@ -4,9 +4,11 @@ import dev.akanksha.ttm4j_cucumber_plugin.api_controller.TestCaseController;
 import dev.akanksha.ttm4j_cucumber_plugin.api_controller.TestCaseCreationTracker;
 import dev.akanksha.ttm4j_cucumber_plugin.api_controller.TestRunController;
 import dev.akanksha.ttm4j_cucumber_plugin.mapper.GherkinModelMapper;
+import dev.akanksha.ttm4j_cucumber_plugin.mapper.TestCaseMapper;
 import dev.akanksha.ttm4j_cucumber_plugin.model.Test;
 import dev.akanksha.ttm4j_cucumber_plugin.model.TestRun;
 import io.cucumber.java.Scenario;
+import io.cucumber.plugin.event.TestCase;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,6 +19,7 @@ public class Utilities {
     static TestCaseController testCaseController = new TestCaseController();
     static TestRunController testRunController = new TestRunController();
     static List<Scenario> scenariosRan = new ArrayList<>();
+    static List<TestCase> testCasesRan = new ArrayList<>();
 
     /**
      * creates test cases on you jira project.
@@ -37,11 +40,6 @@ public class Utilities {
             if(key.isPresent()) {
                 /*
                 //todo: find some solution here
-                if(test.getFields().getDescription() == null || !test.getFields().getDescription().isEmpty()) test.getFields().setDescription("placeholder");
-                if(test.getFields().getPriority() == null) test.getFields().setPriority("1");
-                if(test.getTtmFields().getPrecondition() == null) test.getTtmFields().setPrecondition("placeholder");
-                test.getFields().setDescription("I am just ken");
-                testCaseController.updateTestCase(key.get(), test);
                  */
             }
             else toCreate.add(test);
@@ -55,9 +53,29 @@ public class Utilities {
         testCaseCreationTracker.start();
     }
 
+    public static void postTestData(TestCase testCase) {
+        Test test = TestCaseMapper.getTestFrom(testCase);
+
+        Optional<String> key= testCaseController.fetchTestCaseKeysWithSummary(test.getFields().getSummary());
+        if(key.isPresent()) {
+            /*
+            //todo: find some solution here to update
+             */
+            return;
+        }
+
+        String jobId = testCaseController.postTestCase(Collections.singletonList(test));
+        TestCaseCreationTracker testCaseCreationTracker = new TestCaseCreationTracker(jobId, 3000);
+        testCaseCreationTrackers.add(testCaseCreationTracker);
+        testCaseCreationTracker.start();
+    }
+
     public static void captureTestRuns(Scenario scenario) {
-        //1. save test run data on memory
         scenariosRan.add(scenario);
+    }
+
+    public static void captureTestRuns(TestCase testCase) {
+        testCasesRan.add(testCase);
     }
 
     public static void postTestRunData() throws InterruptedException {
@@ -81,5 +99,25 @@ public class Utilities {
 
             testRunController.postTestRun(testRun);
         }
+
+        //3. for each test case ran,
+        //3.1. find related test key
+        //3.2. post test run with test key
+        for(Scenario scenario : scenariosRan) {
+            Optional<Test> test = testCaseController.fetchTestCaseWithSummary(scenario.getName());
+            if(!test.isPresent()) continue;
+
+            TestRun testRun = TestRun.builder()
+                    .testCaseKey(test.get().getKey())
+                    .status(scenario.getStatus().name())
+                    .testType(test.get().getTestType())
+                    .description(test.get().getFields().getDescription())
+                    .priority(test.get().getFields().getPriority())
+                    .build();
+
+            testRunController.postTestRun(testRun);
+        }
+
+
     }
 }
