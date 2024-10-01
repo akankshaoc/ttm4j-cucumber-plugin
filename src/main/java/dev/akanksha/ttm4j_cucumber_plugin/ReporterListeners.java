@@ -97,6 +97,17 @@ public class ReporterListeners implements EventListener {
         if(!testRuns.containsKey(testCaseFinished.getTestCase())) return;
         TestRun testRun = testRuns.get(testCaseFinished.getTestCase());
         testRun.setStatus(testCaseFinished.getResult().getStatus().toString());
-        testRunController.postTestRun(testRun);
+        Optional<String> testCycleName = testCaseFinished
+                .getTestCase()
+                .getTags()
+                .stream()
+                .filter(t -> t.startsWith("@TTMJTestCycle(") && t.endsWith(")"))
+                .findFirst()
+                .map(s -> s.substring(15, s.lastIndexOf(')')));
+        if(testCycleName.isPresent()) {
+            testRunController.postTestRun(testRun, testCycleName.get());
+        } else {
+            testRunController.postTestRun(testRun);
+        }
     }
 }
