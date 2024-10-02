@@ -52,6 +52,10 @@ public class ReporterListeners implements EventListener {
         //4. record test run
         key = testCaseController.fetchTestCaseKeysWithSummary(runningTest.getName());
         key.ifPresent(s -> testRuns.put(runningTest, TestRun.builder().testCaseKey(s).build()));
+
+        //5. link requirements (if any)
+        key.ifPresent(s -> testCaseController.linkRequirement(s, TestCaseMapper.getRequirementKeysFrom(runningTest)));
+
     }
 
     public void testStepFinished(TestStepFinished testStepFinished) {

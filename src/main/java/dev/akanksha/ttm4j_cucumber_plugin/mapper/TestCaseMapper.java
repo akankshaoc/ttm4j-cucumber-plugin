@@ -7,6 +7,7 @@ import io.cucumber.plugin.event.TestStep;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TestCaseMapper {
     public static Test getTestFrom(TestCase testCase) {
@@ -44,5 +45,13 @@ public class TestCaseMapper {
                 .testType(TestType.Manual)
                 .ttmFields(ttmFields)
                 .build();
+    }
+    public static List<String> getRequirementKeysFrom(TestCase testCase) {
+        return testCase
+                .getTags()
+                .stream()
+                .filter(s -> s.startsWith("@TTMJRequirement(") && s.endsWith(")"))
+                .map(s -> s.substring(s.indexOf("("), s.lastIndexOf(")")))
+                .collect(Collectors.toList());
     }
 }
