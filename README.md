@@ -35,9 +35,10 @@ To get started, download the latest jar and add it to you classpath
         ```
 3. Writing Feature Files
     utilise tags for enabling tracking on TTMJ
-    - @TTMJTest : tracks scenario(s) 
+    - @TTMJTest : tracks scenario(s) as test under test design
     - @TTMJTestCycle(name) : tracks all associated runs in cycle with name 
     - @TTMJRequirement(key) : links all tests with requirement with the given key
+    - @TTMJFolder(path) : places tests under the specified folder
 
 
 ## Example
@@ -57,6 +58,7 @@ When all step definitions are implemented
 Then the scenario passes
 
 @TTMJTest
+@TTMJFolder(a/b) # test case placed under teh specified folder path in test design 
 Scenario: eating apples
 # Step 1
 Given I had "7" apples

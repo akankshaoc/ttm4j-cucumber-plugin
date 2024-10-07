@@ -7,6 +7,7 @@ import io.cucumber.plugin.event.TestStep;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TestCaseMapper {
@@ -40,18 +41,34 @@ public class TestCaseMapper {
                 .steps(steps)
                 .build();
 
-        return Test.builder()
+        Test build = Test.builder()
                 .fields(fields)
                 .testType(TestType.Manual)
                 .ttmFields(ttmFields)
                 .build();
+
+        if(getFolderNameFrom(testCase).isPresent()) {
+            build.setFolder(getFolderNameFrom(testCase).get());
+        }
+
+        return build;
     }
+
     public static List<String> getRequirementKeysFrom(TestCase testCase) {
         return testCase
                 .getTags()
                 .stream()
                 .filter(s -> s.startsWith("@TTMJRequirement(") && s.endsWith(")"))
-                .map(s -> s.substring(s.indexOf("("), s.lastIndexOf(")")))
+                .map(s -> s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")))
                 .collect(Collectors.toList());
+    }
+
+    public static Optional<String> getFolderNameFrom(TestCase testCase) {
+        return testCase
+                .getTags()
+                .stream()
+                .filter(s -> s.startsWith("@TTMJFolder(") && s.endsWith(")"))
+                .findFirst()
+                .map(s -> s.substring(s.indexOf("(") + 1, s.lastIndexOf(")")));
     }
 }
