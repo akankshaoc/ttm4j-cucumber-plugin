@@ -16,7 +16,7 @@ Cucumber Java Test Utility is a robust and easy-to-use plugin for writing and ru
 - **Design and Run**: Publishes data on Test Design as well as Test Executions
 
 ## Installation
-To get started, download the latest jar and add it to you classpath
+To get started, download the [latest jar](https://github.com/akankshaoc/ttm4j-cucumber-plugin/releases/tag/v0.0.1-alpha) and add it to you classpath
 
 ## Usage
 
