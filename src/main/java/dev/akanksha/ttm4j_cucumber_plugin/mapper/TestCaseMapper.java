@@ -29,7 +29,8 @@ public class TestCaseMapper {
                 running = dev.akanksha.ttm4j_cucumber_plugin.model.Step.builder().build();
             } else {
                 running.setDescription(
-                        running.getDescription() == null ? "" : running.getDescription()
+                        (running.getDescription() == null ? "" : running.getDescription())
+                                + " "
                                 + step.getKeyword() + step.getText()
                 );
             }
